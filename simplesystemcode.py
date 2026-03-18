@@ -5,23 +5,42 @@ import math
 
 @dataclass
 class InputParameters:
-
-	# Values below are defaults - they can be altered when calling a simplesystemcode
-	GrossElecPower: float = 1000.0 # Target gross electrical power, MW
-	WallLoad: float = 4.0          # Neutron wall load limit, MW m-2
-	BMax: float = 13.0             # Maximum field on the TF superconductor, T
-	SigmaMax: float = 300.0        # Maximum stress on the TF structure, MPa
-	Li6: float = 0.075             # Fractional concentration of Li6 in breeder material
-	NeutShield: float = 0.99       # Neutron shielding efficiency target for blanket, VV
-	BlktSupport: float = 0.3       # Blanket/shield structural support thickness, m
-	ThermalEff: float = 0.4        # Thermal efficiency of electricity generation, Pe/Pth
-	Kappa: float = 1.0             # Plasma Elongation
-	PlasmaT: float = 15.0          # Plasma temperature, keV (probably shouldn't change this without a better SigV function)
-	SafetyFac: float = 3.5         # Plasma safety factor (q_edge)
-	GamCD: float = 0.5             # Current drive efficiency, gamma_CD
-	ElectEffCD: float = 0.5        # Electrical efficiency of CD system
-	PowerRecirc: float = 0.05      # Fraction of extracted heat representing coolant pumping power
-	ZEff: float = 1.00             # Plasma Zeff - note plasma dilution is not calculated, nor He checked! For radiation calculation
+	"""
+	InputParameters class for fusion system configuration and constraints.
+	This class contains default parameters for a simple fusion system code simulation.
+	All parameters can be modified when instantiating or using the simplesystemcode.
+	Attributes:
+		GrossElecPower (float): Target gross electrical power output in MW. Default: 1000.0
+		WallLoad (float): Neutron wall load limit in MW m-2. Default: 4.0
+		BMax (float): Maximum magnetic field on the TF superconductor in Tesla. Default: 13.0
+		SigmaMax (float): Maximum stress on the TF structure in MPa. Default: 300.0
+		Li6 (float): Fractional concentration of Li6 in breeder material. Default: 0.075
+		NeutShield (float): Neutron shielding efficiency target for blanket and vacuum vessel. Default: 0.99
+		BlktSupport (float): Blanket/shield structural support thickness in meters. Default: 0.3
+		ThermalEff (float): Thermal efficiency of electricity generation (Pe/Pth). Default: 0.4
+		Kappa (float): Plasma elongation. Default: 1.0
+		PlasmaT (float): Plasma temperature in keV. Default: 15.0
+		SafetyFac (float): Plasma safety factor (q_edge). Default: 3.5
+		GamCD (float): Current drive efficiency (gamma_CD). Default: 0.5
+		ElectEffCD (float): Electrical efficiency of the CD system. Default: 0.5
+		PowerRecirc (float): Fraction of extracted heat representing coolant pumping power. Default: 0.05
+		ZEff (float): Plasma effective charge number (Zeff). Note: plasma dilution is not calculated and He is not checked. Default: 1.00
+	"""
+	GrossElecPower: float = 1000.0 
+	WallLoad: float = 4.0          
+	BMax: float = 13.0             
+	SigmaMax: float = 300.0        
+	Li6: float = 0.075             
+	NeutShield: float = 0.99       
+	BlktSupport: float = 0.3       
+	ThermalEff: float = 0.4        
+	Kappa: float = 1.0             
+	PlasmaT: float = 15.0          
+	SafetyFac: float = 3.5         
+	GamCD: float = 0.5             
+	ElectEffCD: float = 0.5        
+	PowerRecirc: float = 0.05      
+	ZEff: float = 1.00             
 
 
 def simplesystemcode(inputs:InputParameters, print_out=True):
@@ -45,12 +64,12 @@ def simplesystemcode(inputs:InputParameters, print_out=True):
 	Li6Dens = inputs.Li6 * LiDens
 	BreedLength = 1.0/(Li6Dens * NeutBreedXC * 1.0e-28)
 	DelX = 2.0 * NeutronMFP * np.log(1.0 - 0.5*np.sqrt(1.0e6*EFastNeut/EThNeut)*(BreedLength/NeutronMFP)*np.log(1.0-inputs.NeutShield))
-	BlnkThk = DelX + inputs.BlktSupport    # Total blanket thickness, m
+	BlanketThickness = DelX + inputs.BlktSupport    # Total blanket thickness, m
 
 	# Step 2: Plasma radius and coil thickness
 	CoilZeta = (inputs.BMax**2)/(4.0 * Mu0 * inputs.SigmaMax * 1.0e6)
-	VIoPe = (1.0/inputs.ThermalEff) * EnRatioOne * np.sqrt(inputs.Kappa) * (BlnkThk/inputs.WallLoad) * ((1.0+CoilZeta)/((1.0-np.sqrt(CoilZeta))**2))
-	RMinor = ((1.0 + CoilZeta)/(2.0 * np.sqrt(CoilZeta)))*BlnkThk   # Plasma minor radius, m
+	VIoPe = (1.0/inputs.ThermalEff) * EnRatioOne * np.sqrt(inputs.Kappa) * (BlanketThickness/inputs.WallLoad) * ((1.0+CoilZeta)/((1.0-np.sqrt(CoilZeta))**2))
+	RMinor = ((1.0 + CoilZeta)/(2.0 * np.sqrt(CoilZeta)))*BlanketThickness   # Plasma minor radius, m
 	R0a = EnRatioOne * (inputs.GrossElecPower/inputs.WallLoad)
 	R0b = 1.0/(inputs.ThermalEff*4.0*np.pi*np.pi*np.sqrt(inputs.Kappa))
 	RMajor = R0a * R0b / RMinor     # Plasma major radius, m
@@ -61,7 +80,7 @@ def simplesystemcode(inputs:InputParameters, print_out=True):
 	Pressure = PressPrefix * np.sqrt((inputs.PlasmaT**2)/(SigV * PlasVol))  # Plasma pressure, atm
 	Aspect = RMajor/RMinor  # Plasma aspect ratio
 	InvAspect = 1.0/Aspect # Inverse aspect ratio
-	MagField = inputs.BMax * (RMajor - RMinor - BlnkThk)/RMajor   # Magnetic field in the plasma, T
+	MagField = inputs.BMax * (RMajor - RMinor - BlanketThickness)/RMajor   # Magnetic field in the plasma, T
 	GeoFac = (1.17 - 0.65*InvAspect)/((1.0-InvAspect**2)**2)
 	PlasCur = GeoFac * (5.0 * RMinor**2 * MagField)/(RMajor * inputs.SafetyFac) * (1.0 + inputs.Kappa**2)/2.0 # Assumes no triangularity for simplicity
 	BPol = Mu0 * PlasCur * 1.0e6 / (2.0 * np.pi * RMinor * np.sqrt(inputs.Kappa))
@@ -75,8 +94,8 @@ def simplesystemcode(inputs:InputParameters, print_out=True):
 	CoolantPower = ThermalPow * inputs.PowerRecirc # Power needed for coolant pumps
 	NetElecPower = inputs.GrossElecPower - PowerCDElec - CoolantPower # Net electrical power once the other two are taken into account
 
-	FusPDens = EnRatioTwo*inputs.GrossElecPower/(inputs.ThermalEff*PlasVol)   # FusionPowerDensity, MW m-3
-	FusPower = FusPDens * PlasVol   # Fusion Power, MW
+	FusPowerDensity = EnRatioTwo*inputs.GrossElecPower/(inputs.ThermalEff*PlasVol)   # FusionPowerDensity, MW m-3
+	FusPower = FusPowerDensity * PlasVol   # Fusion Power, MW
 	PlasHeat = 0.2 * FusPower + PowerCD # Total plasma heating power, MW
 	PTauE = 0.0562 * PlasCur**0.93 * MagField**0.15 * (10.0*PlasmaDens)**0.41 * PlasHeat**(-0.69) * RMajor**1.97 * inputs.Kappa**0.78 * InvAspect**0.58 * 2.5**0.19 # Prediction from IPB98(y,2), s
 	ThermalE = Pressure * PlasVol / 10.0 # Thermal energy, MJ
@@ -84,7 +103,7 @@ def simplesystemcode(inputs:InputParameters, print_out=True):
 	HFact = TauE/PTauE
 
 	# Final parameters
-	MagThk = (np.sqrt(CoilZeta)*(1.0+np.sqrt(CoilZeta)))/(1.0-np.sqrt(CoilZeta))*BlnkThk    # Magnet thickness, m
+	MagnetThickness = (np.sqrt(CoilZeta)*(1.0+np.sqrt(CoilZeta)))/(1.0-np.sqrt(CoilZeta))*BlanketThickness    # Magnet thickness, m
 	Beta = 2.0 * 100000.0 * Pressure * Mu0/(MagField**2)  # Plasma beta (normalised plasma pressure)
 	PlasSurf = 4.0 * np.pi**2 * RMinor * RMajor * np.sqrt(inputs.Kappa)  # Plasma surface area, m2
 	WallLoadCalc = 0.8 * FusPower / PlasSurf  # Cross-check on neutron wall loading, MW m-2
@@ -127,9 +146,9 @@ def simplesystemcode(inputs:InputParameters, print_out=True):
 	out_dict["BremRad"] = BremRad
 	out_dict["SynchRad"] = SynchRad
 	out_dict["ZEff"] = inputs.ZEff # If this is too high the plasma is radiatively unstable, and highly diluted so fusion power will be depressed (although improvement of confinement with Zeff somewhat compensates for this)
-	out_dict["MagThk"] = MagThk
-	out_dict["BlnkThk"] = BlnkThk
-	out_dict["Bore"] = RMajor - RMinor - BlnkThk - MagThk # Affects the size of cental solenoid and hence flux swing available
+	out_dict["MagThk"] = MagnetThickness
+	out_dict["BlnkThk"] = BlanketThickness
+	out_dict["Bore"] = RMajor - RMinor - BlanketThickness - MagnetThickness # Affects the size of cental solenoid and hence flux swing available
 	out_dict["WallLoadCalc"] = WallLoadCalc
 
 	# Set ExitCode parameter to 1 if computation yields nan or inf for any parameter in out_dict.
@@ -168,9 +187,9 @@ def simplesystemcode(inputs:InputParameters, print_out=True):
 		print('Synchrotron radiation: {:2.2f} MW'.format(SynchRad))
 		print('Plasma ZEff: {:2.2f}'.format(inputs.ZEff))  # If this is too high the plasma is radiatively unstable, and highly diluted so fusion power will be depressed (although improvement of confinement with Zeff somewhat compensates for this)
 		print("")
-		print('Magnet thickness: {:2.2f} m'.format(MagThk))
-		print('Blanket/shield thickness: {:2.2f} m'.format(BlnkThk))
-		print('Bore: {:2.2f} m'.format(RMajor - RMinor - BlnkThk - MagThk))   # Affects the size of cental solenoid and hence flux swing available
+		print('Magnet thickness: {:2.2f} m'.format(MagnetThickness))
+		print('Blanket/shield thickness: {:2.2f} m'.format(BlanketThickness))
+		print('Bore: {:2.2f} m'.format(RMajor - RMinor - BlanketThickness - MagnetThickness))   # Affects the size of cental solenoid and hence flux swing available
 		print('Wall load: {:2.2f} MW m-2'.format(WallLoadCalc))
 
 	# Return input and output data as a complete design point
