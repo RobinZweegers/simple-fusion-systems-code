@@ -48,3 +48,16 @@ def ip_shape_factor(delta, c1=0.15, c2=0.10):
         needed for taking triangularity into account => simple fit; kinda need sum papers for this tbh
     """
     return 1.0 + c1*delta + c2*delta**2
+
+def sauter_ip_shape_factor(kappa: float, delta: float, squareness: float = 1.0) -> float:
+	"""
+	Engineering fit for shaping effect on plasma current / q95 based on Sauter et al.
+	The w07 squareness factor is held at 1.0 because this simple model does not resolve squareness.
+     
+     taken from : https://pdf.sciencedirectassets.com/271368/1-s2.0-S0920379616X00099/1-s2.0-S0920379616303234/main.pdf
+     """
+	kappa_term = 1.0 + 1.2 * (kappa - 1.0) + 0.56 * (kappa - 1.0)**2
+	delta_term = (1.0 + 0.09 * delta + 0.16 * delta**2) / (1.0 + 0.45 * delta)
+	shape_term = 1.0 - 0.74 * delta * squareness
+	square_term = 1.0 + 0.55 * (squareness - 1.0)
+	return kappa_term * delta_term / shape_term * square_term

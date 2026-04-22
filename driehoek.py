@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import numpy as np
 import math
 
-from geometry import shape_geometry, ip_shape_factor
+from geometry import shape_geometry, ip_shape_factor, sauter_ip_shape_factor
 
 @dataclass
 class InputParameters:
@@ -94,15 +94,16 @@ def simplesystemcode(inputs:InputParameters, print_out=True):
 	GeoFac = (1.17 - 0.65*InvAspect)/((1.0-InvAspect**2)**2)
 
 	PlasCur0 = GeoFac * (5.0 * RMinor**2 * MagField)/(RMajor * inputs.SafetyFac) * (1.0 + inputs.Kappa**2)/2.0 # Assumes no triangularity for simplicity
-	PlasCur = PlasCur0 * ip_shape_factor(inputs.Delta)
+	PlasCurOld = PlasCur0 * ip_shape_factor(inputs.Delta)
+	PlasCur = PlasCur0 * sauter_ip_shape_factor(inputs.Kappa, inputs.Delta)
 	# PlasCur = PlasCur0
-	print(f"\tIp_old / Ip : \t{PlasCur0} / {PlasCur}")
+	# print(f"\tIp_old / Ip  / Sauter: \t{PlasCur0} / {PlasCurOld} / {PlasCur}")
 
 	BPol_old = Mu0 * PlasCur * 1.0e6 / (2.0 * np.pi * RMinor * np.sqrt(inputs.Kappa))
 	# adjusting the Bpol to take triangularity into account
 	BPol = Mu0 * PlasCur * 1.0e6 / PlasPerim
 
-	print(f"\tBpol_old / Bpol : \t{BPol_old} / {BPol}")
+	# print(f"\tBpol_old / Bpol : \t{BPol_old} / {BPol}")
 
 	BetaPol = 2.0 * 100000.0 * Pressure * Mu0/(BPol**2)  # Plasma poloidal beta (normalised plasma pressure)
 
