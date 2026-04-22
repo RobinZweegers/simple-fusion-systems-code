@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import numpy as np
 import math
 
+from geometry import shape_geometry, ip_shape_factor
 
 @dataclass
 class InputParameters:
@@ -43,37 +44,6 @@ class InputParameters:
 	ZEff: float = 1.00    
 	Delta : float = 0.0 #this is the triangularity parameter of the tokamak         
 
-# helper for NT ; reduces to the orginal elongation funtion as used in the preivous systems code
-def _miller_boundary(r_major, r_minor, kappa, delta, npts=2048):
-    theta = np.linspace(0.0, 2.0*np.pi, npts, endpoint=False)
-    delta = float(np.clip(delta, -0.8, 0.8))
-    alpha = np.arcsin(delta)
-
-    r = r_major + r_minor * np.cos(theta + alpha * np.sin(theta))
-    z = kappa * r_minor * np.sin(theta)
-
-    return r, z
-
-
-def _closed_curve_area(r, z):
-    r_next = np.roll(r, -1)
-    z_next = np.roll(z, -1)
-    return 0.5 * np.abs(np.sum(r * z_next - r_next * z))
-
-def _surface_of_revolution(r, z):
-    r_next = np.roll(r, -1)
-    z_next = np.roll(z, -1)
-    ds = np.sqrt((r_next - r)**2 + (z_next - z)**2)
-    r_mid = 0.5 * (r + r_next)
-    return 2.0 * np.pi * np.sum(r_mid * ds)
-
-# uses the previous two helpers and returns the entire plasma / shape geometry
-def _shape_geometry(r_major, r_minor, kappa, delta):
-    r, z = _miller_boundary(r_major, r_minor, kappa, delta)
-    area = _closed_curve_area(r, z)
-    surface = _surface_of_revolution(r, z)
-    volume = 2.0 * np.pi * r_major * area
-    return area, surface, volume
 
 def simplesystemcode(inputs:InputParameters, print_out=True):
 
@@ -108,21 +78,39 @@ def simplesystemcode(inputs:InputParameters, print_out=True):
 	# PlasVol = 2.0 * np.pi**2 * RMinor**2 * inputs.Kappa * RMajor   # Plasma Volume, m3
 
 	# this replaces the previous volume / surface calculations
-	PlasCrossSection, PlasSurf, PlasVol = _shape_geometry(
+	PlasCrossSection, PlasPerim, PlasSurf, PlasVol = shape_geometry(
 		RMajor, RMinor, inputs.Kappa, inputs.Delta
 	)
 
 	# Others
 	PressPrefix = 0.0000000000084 * np.sqrt(400)
 	Pressure = PressPrefix * np.sqrt((inputs.PlasmaT**2)/(SigV * PlasVol))  # Plasma pressure, atm
+
+
 	Aspect = RMajor/RMinor  # Plasma aspect ratio
 	InvAspect = 1.0/Aspect # Inverse aspect ratio
+	
 	MagField = inputs.BMax * (RMajor - RMinor - BlanketThickness)/RMajor   # Magnetic field in the plasma, T
 	GeoFac = (1.17 - 0.65*InvAspect)/((1.0-InvAspect**2)**2)
-	PlasCur = GeoFac * (5.0 * RMinor**2 * MagField)/(RMajor * inputs.SafetyFac) * (1.0 + inputs.Kappa**2)/2.0 # Assumes no triangularity for simplicity
-	BPol = Mu0 * PlasCur * 1.0e6 / (2.0 * np.pi * RMinor * np.sqrt(inputs.Kappa))
+
+	PlasCur0 = GeoFac * (5.0 * RMinor**2 * MagField)/(RMajor * inputs.SafetyFac) * (1.0 + inputs.Kappa**2)/2.0 # Assumes no triangularity for simplicity
+	PlasCur = PlasCur0 * ip_shape_factor(inputs.Delta)
+	# PlasCur = PlasCur0
+	print(f"\tIp_old / Ip : \t{PlasCur0} / {PlasCur}")
+
+	BPol_old = Mu0 * PlasCur * 1.0e6 / (2.0 * np.pi * RMinor * np.sqrt(inputs.Kappa))
+	# adjusting the Bpol to take triangularity into account
+	BPol = Mu0 * PlasCur * 1.0e6 / PlasPerim
+
+	print(f"\tBpol_old / Bpol : \t{BPol_old} / {BPol}")
+
 	BetaPol = 2.0 * 100000.0 * Pressure * Mu0/(BPol**2)  # Plasma poloidal beta (normalised plasma pressure)
-	BootFrac = min(0.5 * np.sqrt(InvAspect) * BetaPol, 1.0) # Bootstrap fraction, very simple formula
+
+	BootDrive = 0.5 * np.sqrt(InvAspect) * BetaPol
+	BootFrac = BootDrive / (1.0 + BootDrive)
+	# BootFrac = min(0.5 * np.sqrt(InvAspect) * BetaPol, 1.0) # Bootstrap fraction, very simple formula
+
+
 	DrivenCurrent = PlasCur * (1.0 - BootFrac)
 	PlasmaDens = Pressure/(2.0*0.1602*inputs.PlasmaT)      # Plasma electron density, 10^20 m-3
 	PowerCD = PlasmaDens * DrivenCurrent * RMajor / inputs.GamCD # MW
@@ -147,7 +135,10 @@ def simplesystemcode(inputs:InputParameters, print_out=True):
 
 	WallLoadCalc = 0.8 * FusPower / PlasSurf  # Cross-check on neutron wall loading, MW m-2
 	StableKappa = 1.46 + 0.5/(Aspect-1.0)  # Estimated maximum vertically-controllable kappa
-	nG = PlasCur / (np.pi * RMinor**2) # Greenwald density limit
+	# nG = PlasCur / (np.pi * RMinor**2) # Greenwald density limit
+	# replacing this one with the proper calculated corss
+	nG = PlasCur / PlasCrossSection # Greenwald density limit
+	
 
 	# Radiation losses
 	# Using forms from Matthews et al Nuc. Fus. 39 (1999)
@@ -202,7 +193,7 @@ def simplesystemcode(inputs:InputParameters, print_out=True):
 	# Print output
 	if print_out:
 		print("Simple systems code fusion power plant:\n")
-		print('Major radius: {:2.2f} m'.format(RMajor))
+		print('M	ajor radius: {:2.2f} m'.format(RMajor))
 		print('Minor radius: {:2.2f} m'.format(RMinor))
 		print('Aspect ratio: {:2.2f}'.format(Aspect))
 		print('Plasma elongation: {:2.2f}'.format(inputs.Kappa))

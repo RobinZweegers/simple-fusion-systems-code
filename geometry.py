@@ -1,0 +1,50 @@
+import numpy as np
+
+# helper for NT ; reduces to the orginal elongation funtion as used in the preivous systems code
+def _miller_boundary(r_major, r_minor, kappa, delta, npts=2048):
+    theta = np.linspace(0.0, 2.0*np.pi, npts, endpoint=False)
+    delta = float(np.clip(delta, -0.8, 0.8))
+    alpha = np.arcsin(delta)
+
+    r = r_major + r_minor * np.cos(theta + alpha * np.sin(theta))
+    z = kappa * r_minor * np.sin(theta)
+
+    return r, z
+
+
+def _closed_curve_area(r, z):
+    r_next = np.roll(r, -1)
+    z_next = np.roll(z, -1)
+    return 0.5 * np.abs(np.sum(r * z_next - r_next * z))
+
+def _surface_of_revolution(r, z):
+    r_next = np.roll(r, -1)
+    z_next = np.roll(z, -1)
+    ds = np.sqrt((r_next - r)**2 + (z_next - z)**2)
+    r_mid = 0.5 * (r + r_next)
+    return 2.0 * np.pi * np.sum(r_mid * ds)
+
+def _boundary_perimeter(r, z):
+    r_next = np.roll(r, -1)
+    z_next = np.roll(z, -1)
+
+    ds = np.sqrt((r_next - r)**2 + (z_next - z)**2)
+
+    return np.sum(ds)
+
+# uses the previous two helpers and returns the entire plasma / shape geometry
+def shape_geometry(r_major, r_minor, kappa, delta):
+    r, z = _miller_boundary(r_major, r_minor, kappa, delta)
+    area = _closed_curve_area(r, z)
+    surface = _surface_of_revolution(r, z)
+    volume = 2.0 * np.pi * r_major * area
+    perimeter = _boundary_perimeter(r,z)
+    return area, perimeter, surface, volume
+
+
+
+def ip_shape_factor(delta, c1=0.15, c2=0.10):
+    """
+        needed for taking triangularity into account => simple fit; kinda need sum papers for this tbh
+    """
+    return 1.0 + c1*delta + c2*delta**2
