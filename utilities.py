@@ -25,13 +25,13 @@ def write_csv(scan, filename):
 		file.write(data_rows)
 
 
-def plot_scan(scan_out, x_par, y_par, outname="plot.png"):
+def plot_scan(scan_out, x_par, y_par, outname="plot.png",color="blue"):
 	"""
 	Plot scan output
 	"""
 	X = [scan_out[i][x_par] for i in range(np.size(scan_out))]
 	Y = [scan_out[i][y_par] for i in range(np.size(scan_out))]
-	plt.scatter(X,Y)
+	plt.scatter(X,Y, color=color)
 	plt.xlabel(x_par)
 	plt.ylabel(y_par)
 	# print("SHIT HEAT")
