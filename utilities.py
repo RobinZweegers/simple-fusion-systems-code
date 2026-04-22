@@ -34,4 +34,6 @@ def plot_scan(scan_out, x_par, y_par):
 	plt.scatter(X,Y)
 	plt.xlabel(x_par)
 	plt.ylabel(y_par)
-	plt.savefig('test_plot.png')
+	# print("SHIT HEAT")
+	plt.savefig('test_plot_thingy.png')
+
