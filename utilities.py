@@ -25,7 +25,7 @@ def write_csv(scan, filename):
 		file.write(data_rows)
 
 
-def plot_scan(scan_out, x_par, y_par):
+def plot_scan(scan_out, x_par, y_par, outname="plot.png"):
 	"""
 	Plot scan output
 	"""
@@ -35,5 +35,5 @@ def plot_scan(scan_out, x_par, y_par):
 	plt.xlabel(x_par)
 	plt.ylabel(y_par)
 	# print("SHIT HEAT")
-	plt.savefig('test_plot_thingy.png')
+	plt.savefig(outname)
 
