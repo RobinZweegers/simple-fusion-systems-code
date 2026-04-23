@@ -225,6 +225,8 @@ def simplesystemcode(inputs:InputParameters, print_out=True):
 		print('Blanket/shield thickness: {:2.2f} m'.format(BlanketThickness))
 		print('Bore: {:2.2f} m'.format(RMajor - RMinor - BlanketThickness - MagnetThickness))   # Affects the size of cental solenoid and hence flux swing available
 		print('Wall load: {:2.2f} MW m-2'.format(WallLoadCalc))
+		print('Energy conf: {:2.2f} seconds'.format(TauE))
+		
 
 	# Return input and output data as a complete design point
 	design_point = dict(inputs.__dict__, **out_dict)
