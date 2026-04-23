@@ -215,6 +215,8 @@ def simplesystemcode(inputs:InputParameters, print_out=True):
 		print('n / nG: {:2.2f}'.format(PlasmaDens/nG))              # Ideally not too much above 1.2 or so
 		print('Divertor power loading: {:2.2f} MW T m-1'.format(DivLoad))  # Probably try to keep this below 30 for the purposes of this exercise
 		print('Field in plasma: {:2.2f} T'.format(MagField))
+		print('Pol Field in plasma: {:2.2f} T'.format(BPol))
+		print('Current in plasma: {:2.2f} MA'.format(PlasCur))
 		print('Normalised beta: {:2.2f} % m T MA-1'.format(100.0 * Beta * RMinor * MagField/PlasCur))   # Below 4.5 or so
 		print('Line radiation: {:2.2f} MW'.format(LineRad))
 		print('Bremsstrahlung radiation: {:2.2f} MW'.format(BremRad))
