@@ -88,7 +88,7 @@ def simplesystemcode(inputs:InputParameters, print_out=True):
 
 
 	Aspect = RMajor/RMinor  # Plasma aspect ratio
-	InvAspect = 1.0/Aspect # Inverse aspect ratio
+	InvAspect = 1.0/Aspect 	# Inverse aspect ratio
 	
 	MagField = inputs.BMax * (RMajor - RMinor - BlanketThickness)/RMajor   # Magnetic field in the plasma, T
 	GeoFac = (1.17 - 0.65*InvAspect)/((1.0-InvAspect**2)**2)
@@ -202,6 +202,8 @@ def simplesystemcode(inputs:InputParameters, print_out=True):
 		print('Bootstrap current fraction: {:2.2f}'.format(BootFrac))   # The higher, the better
 		print('Plasma volume: {:2.2f} m3'.format(PlasVol))
 		print('Plasma surface area: {:2.2f} m2'.format(PlasSurf))
+		print('Plamsa Kappa: {:2.2f}'.format(inputs.Kappa))
+		print('Plamsa Triangularity: {:2.2f}'.format(inputs.Delta))
 		print("")
 		print('Fusion power: {:2.2f} MW'.format(FusPower))
 		print('CD power for steady-state: {:2.2f} MW'.format(PowerCD))
