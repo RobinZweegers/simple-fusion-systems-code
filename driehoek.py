@@ -213,6 +213,7 @@ def simplesystemcode(inputs:InputParameters, print_out=True):
 		print("")
 		print('H factor: {:2.2f} (IPB98(y,2))'.format(HFact))       # Ideally not too much above 1.2 or so
 		print('n / nG: {:2.2f}'.format(PlasmaDens/nG))              # Ideally not too much above 1.2 or so
+		print('nG: {:2.2f}'.format(nG))              # Ideally not too much above 1.2 or so
 		print('Divertor power loading: {:2.2f} MW T m-1'.format(DivLoad))  # Probably try to keep this below 30 for the purposes of this exercise
 		print('Field in plasma: {:2.2f} T'.format(MagField))
 		print('Pol Field in plasma: {:2.2f} T'.format(BPol))

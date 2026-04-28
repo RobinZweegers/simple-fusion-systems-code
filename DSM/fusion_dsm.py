@@ -93,7 +93,7 @@ DESIGN_EDGES = [
     (PF_COILS, CRYOSTAT, "Design", ""),
     (PF_COILS, TF_COILS, "Design", ""),
     (PF_COILS, PORTS, "Design", ""),
-    (PF_COILS, CENTRAL_SOLENOID, "Design", ""),
+    # (PF_COILS, CENTRAL_SOLENOID, "Design", ""),
 
     # Stabilizing coils
     (STAB_COILS, TF_COILS, "Design", ""),

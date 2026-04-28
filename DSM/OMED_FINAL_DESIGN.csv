@@ -1,0 +1,81 @@
+source,target,kind,labels
+Breeding Blanket,First Wall,,Design
+First Wall,Breeding Blanket,,Design
+Breeding Blanket,Vacuum Vessel,,Design
+Vacuum Vessel,Breeding Blanket,,Design
+Breeding Blanket,Wall Cooling System,,Design
+Wall Cooling System,Breeding Blanket,,Design
+Breeding Blanket,Divertor,,Design
+Divertor,Breeding Blanket,,Design
+Breeding Blanket,Tritium Processing System,,Design
+Tritium Processing System,Breeding Blanket,,Design
+TF coils,PF coils,,Design
+PF coils,TF coils,,Design
+TF coils,Central Solenoid,,Design
+Central Solenoid,TF coils,,Design
+TF coils,Stabilizing coils,,Design
+Stabilizing coils,TF coils,,Design
+TF coils,Cryostat,,Design
+Cryostat,TF coils,,Design
+TF coils,Vacuum Vessel,,Design
+Vacuum Vessel,TF coils,,Design
+PF coils,Central Solenoid,,Design
+Central Solenoid,PF coils,,Design
+PF coils,Vacuum Vessel,,Design
+Vacuum Vessel,PF coils,,Design
+PF coils,Cryostat,,Design
+Cryostat,PF coils,,Design
+Central Solenoid,Cryostat,,Design
+Cryostat,Central Solenoid,,Design
+Central Solenoid,Vacuum Vessel,,Design
+Vacuum Vessel,Central Solenoid,,Design
+Stabilizing coils,Vacuum Vessel,,Design
+Vacuum Vessel,Stabilizing coils,,Design
+Stabilizing coils,First wall,,Design
+First wall,Stabilizing coils,,Design
+Vacuum Vessel,First wall,,Design
+First wall,Vacuum Vessel,,Design
+Vacuum Vessel,Divertor,,Design
+Divertor,Vacuum Vessel,,Design
+Vacuum Vessel,Diagnostics,,Design
+Diagnostics,Vacuum Vessel,,Design
+Vacuum Vessel,Heating system,,Design
+Heating system,Vacuum Vessel,,Design
+Vacuum Vessel,Fueling system,,Design
+Fueling system,Vacuum Vessel,,Design
+Vacuum Vessel,Pumping system,,Design
+Pumping system,Vacuum Vessel,,Design
+Vacuum Vessel,Cryostat,,Design
+Cryostat,Vacuum Vessel,,Design
+First wall,Divertor,,Design
+Divertor,First wall,,Design
+First wall,Wall Cooling system,,Design
+Wall Cooling system,First wall,,Design
+Divertor,Pumping system,,Design
+Pumping system,Divertor,,Design
+Divertor,Wall Cooling system,,Design
+Wall Cooling system,Divertor,,Design
+Heating system,Diagnostics,,Design
+Diagnostics,Heating system,,Design
+Heating system,Plasma control system,,Design
+Plasma control system,Heating system,,Design
+Fueling system,Plasma control system,,Design
+Plasma control system,Fueling system,,Design
+Fueling system,Diagnostics,,Design
+Diagnostics,Fueling system,,Design
+Diagnostics,Plasma control system,,Design
+Plasma control system,Diagnostics,,Design
+Pumping system,Cryostat,,Design
+Cryostat,Pumping system,,Design
+Wall Cooling system,Power conversion system,,Design
+Power conversion system,Wall Cooling system,,Design
+Plasma,First wall,,Design
+First wall,Plasma,,Design
+Plasma,Divertor,,Design
+Divertor,Plasma,,Design
+Plasma,Heating system,,Design
+Heating system,Plasma,,Design
+Plasma,Fueling system,,Design
+Fueling system,Plasma,,Design
+Plasma,Plasma control system,,Design
+Plasma control system,Plasma,,Design
